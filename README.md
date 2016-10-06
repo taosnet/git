@@ -8,7 +8,7 @@ The images sets the current working directory within the container to */git*. It
 
 If you setup an alias command, you can run the image as if git were installed on the host machine:
 ```
-alias git='docker run --rm -ti -v `pwd`:/git:Z taosnet/git
+alias git='docker run --rm -ti -v `pwd`:/git:Z taosnet/git'
 ```
 Make sure that you use **'** instead of **"**. This makes it so that the **pwd** command is executed everytime the command is run. **"** would run **pwd** when the command is created.
 
