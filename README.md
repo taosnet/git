@@ -21,3 +21,24 @@ git config user.email "email@domain.com"
 git add file1 file2 ...
 git commit -m "Initial commit"
 ```
+
+### SSH
+
+The default image does not have ssh installed. To use an image with SSH installed, use the **ssh** tag:
+```
+docker run --rm -ti -v `pwd`:/git:Z taosnet/git:ssh
+```
+You can easily extend this image with your own ssh keys with a Dockerfile that looks like this:
+```
+FROM taosnet/git:ssh
+
+COPY ssh /root/.ssh
+```
+openssh is very finicky about permissions, so make sure the file permissions are correct on your files berfore building:
+```
+chmod 700 ssh
+chmod 600 ssh/id_rsa
+chmod 644 ssh/id_rsa.pub
+
+docker build -t taosnet/mygit .
+```
