@@ -1,0 +1,31 @@
+#!/bin/sh
+
+usage() {
+	>&2 echo "Usage: $0 [-u user] [-g group] repository"
+	exit 1
+}
+
+user="$SSH_USER"
+group="root"
+
+while getopts "u:g:" o; do
+	case "${o}" in
+		u) user="${OPTARG}" ;;
+		g) group="${OPTARG}" ;;
+		*) usage;;
+	esac
+done
+shift $((OPTIND-1))
+
+if [ -z "$1" ]; then usage; fi
+
+repository="$1"
+if [ -e "$repository" ]; then
+	>&2 echo "Error: Repository directory already exists!"
+	exit 2
+fi
+
+mkdir -p "$repository"
+cd "$repository"
+git init --bare
+chown -R "$user"."$group" .

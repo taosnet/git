@@ -4,6 +4,8 @@ Simple docker image to run git on the host machine.
 
 ## Usage
 
+### taosnet/git:latest
+
 The images sets the current working directory within the container to */git*. It is best to mount a data volume in /git to get the expected result.
 
 If you setup an alias command, you can run the image as if git were installed on the host machine:
@@ -22,23 +24,22 @@ git add file1 file2 ...
 git commit -m "Initial commit"
 ```
 
-### SSH
+### taosnet/git:ssh
 
-The default image does not have ssh installed. To use an image with SSH installed, use the **ssh** tag:
-```
-docker run --rm -ti -v `pwd`:/git:Z taosnet/git:ssh
-```
-You can easily extend this image with your own ssh keys with a Dockerfile that looks like this:
-```
-FROM taosnet/git:ssh
+This image is designed to be a git repository server accessible via ssh. This image uses [taosnet/ssh_server](https://hub.docker.com/r/taosnet/ssh_server/) as the base image, so associated environmental variables and utilities apply. This image adds a utility **createRepository** to make it easy to create empty repositories.
 
-COPY ssh /root/.ssh
-```
-openssh is very finicky about permissions, so make sure the file permissions are correct on your files berfore building:
-```
-chmod 700 ssh
-chmod 600 ssh/id_rsa
-chmod 644 ssh/id_rsa.pub
+#### Example
 
-docker build -t taosnet/mygit .
+Create a repository accessible by two users:
+
 ```
+docker run --name myrepo -d -p 2222:22 -v myrepo:/repos -e SSH_USER=gitrepo taosnet/git:ssh
+docker exec myrepo addgroup repousers
+docker exec setupUser.sh -g repousers -k 'user1 ssh key...' user1
+docker exec setupUser.sh -g repousers -k 'user2 ssh key...' user2
+docker exec createRepository -u gitrepo -g repousers /repos/project1
+```
+
+#### Utilities
+
+* **createRepository**: Creates a new empty repository at the given path. Usage: `createRepository [-u user] [-g group] pathToRepository`. Repository path should not already exist. If given, the repository will be set with _user_ as the owner and _group_ as the group.
